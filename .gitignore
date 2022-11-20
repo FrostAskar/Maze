@@ -1,0 +1,7 @@
+target
+Maze.html
+.idea
+.vscode
+script
+src/main/resources
+*.png
