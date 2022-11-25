@@ -1,8 +1,7 @@
 package frost.countermobil.Maze.services;
 
 import frost.countermobil.Maze.models.*;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+//import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,13 +24,13 @@ public class MazeBuilder {
 
     }
 
-    /*
-    CONCEPT TIME:
-        Create one object door. This door has to be assigned to 2 rooms
-     */
 
-    public void createDoor(Room room1, Room room2, Maze.Directions direction) {
+    public void createDoor(Room room1, Room room2, Maze.Directions direction, String status) {
         Door door = new Door();
+        if(status.equals("block")) {
+            Key key = new Key();
+            door.lock(key);
+        }
         door.setRoom1(room1);
         door.setRoom2(room2);
         room1.setSide(direction, door);
@@ -57,18 +56,67 @@ public class MazeBuilder {
         room.setSide(reverseDirection, door);
     }
 
-    public void createLockedDoor(Room room1, Room room2){
-
-    }
-
-    public void createReverseLockedDoor(){
-
-    }
-
-    public Maze createMaze(int NumberRooms){
+    public Maze createMazeSimple(){
         Maze maze = new Maze();
+        //Creates a list of enclosed rooms not connected
+        List<Room> rooms = new ArrayList<>();
+        for (int i = 0; i < 4; i++){
+            rooms.add(createRoom());
+        }
+        //Creation of open doors and connections between rooms
+        createDoor(rooms.get(0), rooms.get(1), Maze.Directions.NORTH, "open");
+        createDoor(rooms.get(2), rooms.get(3), Maze.Directions.EAST, "open");
+        //Creation of closed doors and connections between rooms. Creates key in door
+        createDoor(rooms.get(0), rooms.get(2), Maze.Directions.SOUTH, "block");
+        //Assignation of key coordinates and room it's stored in
+        setKeyInRoom(rooms.get(1), rooms.get(0).getDoorInSide(Maze.Directions.SOUTH).getKey(), 0.3, 0.9);
+        //Assignation of coin coordinates and room they're stored in
+        setCoinInRoom(rooms.get(0), new Coin(), 0.3, 0.5);
+        setCoinInRoom(rooms.get(1), new Coin(), 0.5, 0.3);
+        setCoinInRoom(rooms.get(2), new Coin(), 0.9, 0.9);
+        //Goal room
+        rooms.get(3).setTarget();
+
+        maze.setRooms(rooms);
         return maze;
     }
+
+    public void setKeyInRoom(Room targetRoom, Key key, double coordX, double coordY) {
+        key.setCoords(coordX, coordY);
+        targetRoom.setKey(key);
+    }
+
+    public void setCoinInRoom(Room targetRoom, Coin coin, double coordX, double coordY) {
+        coin.setCoords(coordX, coordY);
+        targetRoom.setCoin(coin);
+    }
+
+//    public JSONObject roomToJSON (Room room, Player player) {
+//        JSONObject jsonRoom = new JSONObject();
+//        jsonRoom.put("room", room.getRoomId());
+//        JSONObject walls = new JSONObject(room.getSides());
+//        JSONObject items = new JSONObject();
+//        JSONObject inventory = new JSONObject();
+//        if (room.getCoin() != null) {
+//            JSONObject coin = new JSONObject();
+//            coin.put("x", room.getCoin().getCoordX());
+//            coin.put("y", room.getCoin().getCoordY());
+//            items.put("coin", coin);
+//        }
+//        if (room.getKey() != null) {
+//            JSONObject key = new JSONObject();
+//            key.put("x", room.getKey().getCoordX());
+//            key.put("y", room.getKey().getCoordY());
+//            items.put("key", key);
+//        }
+//        inventory.put("keys", player.totalKeys());
+//        inventory.put("coins", player.totalCoins());
+//        jsonRoom.put("walls", walls);
+//        jsonRoom.put("items", items);
+//        jsonRoom.put("inventory", inventory);
+//        return jsonRoom;
+//    }
+
 //  todo remember to delete
 //    public String example(){
 //        JSONObject root = new JSONObject();
