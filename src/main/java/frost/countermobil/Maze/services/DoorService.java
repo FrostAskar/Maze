@@ -1,9 +1,6 @@
 package frost.countermobil.Maze.services;
 
-import frost.countermobil.Maze.models.Door;
-import frost.countermobil.Maze.models.Key;
-import frost.countermobil.Maze.models.Player;
-import frost.countermobil.Maze.models.Room;
+import frost.countermobil.Maze.models.*;
 
 import java.util.List;
 
@@ -30,6 +27,10 @@ public class DoorService {
             target = room1ID;
         }
         return target;
+    }
+
+    public boolean canMoveToNextRoom(Room room, Maze.Directions dir) {
+        return room.getSide(dir) instanceof Door && !((Door) room.getSide(dir)).isBlocked();
     }
 
 }

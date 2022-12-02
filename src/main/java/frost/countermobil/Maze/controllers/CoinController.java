@@ -4,6 +4,9 @@ import frost.countermobil.Maze.models.Coin;
 import frost.countermobil.Maze.models.Game;
 import frost.countermobil.Maze.models.Room;
 import frost.countermobil.Maze.services.GameService;
+import frost.countermobil.Maze.services.MessageService;
+import frost.countermobil.Maze.util.JSONParser;
+import org.json.simple.JSONObject;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -19,19 +22,24 @@ public class CoinController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();
         GameService gameService = new GameService();
+        MessageService messageService = new MessageService();
 
         Game game = (Game) session.getAttribute("game");
-        int numberRoom = (int) session.getAttribute("numberRoom");
-
+        int numberRoom = gameService.getRoomOnPlayer(game);
+        String message;
         Room room = gameService.recoverRoomInMaze(game, numberRoom);
+        Coin coin = null;
 
         if (room.getCoin() != null) {
-            Coin coin = room.getCoin();
+            coin = room.getCoin();
             game.getPlayer().addCoin(coin);
+            message = messageService.itemCollectedMessage(coin);
             room.removeCoin();
         } else {
-            session.setAttribute("errorLog", "There is no coin in this room, buckaroo.");
+            message = messageService.illegalPickupMessage(coin);
         }
+
+        session.setAttribute("message", message);
 
         resp.sendRedirect("/nav");
     }

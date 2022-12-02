@@ -37,6 +37,10 @@ public class Room {
         sides.put(direction, sight);
     }
 
+    public MapSight getSide (Maze.Directions dir) {
+        return this.sides.get(dir);
+    }
+
     public void setTarget() {
         this.target = true;
     }

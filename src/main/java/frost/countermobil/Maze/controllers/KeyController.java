@@ -4,6 +4,10 @@ import frost.countermobil.Maze.models.Game;
 import frost.countermobil.Maze.models.Key;
 import frost.countermobil.Maze.models.Room;
 import frost.countermobil.Maze.services.GameService;
+import frost.countermobil.Maze.services.KeyService;
+import frost.countermobil.Maze.services.MessageService;
+import frost.countermobil.Maze.util.JSONParser;
+import org.json.simple.JSONObject;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -20,17 +24,14 @@ public class KeyController extends HttpServlet {
         GameService gameService = new GameService();
         HttpSession session = req.getSession();
 
-        Game game = (Game) session.getAttribute("game");
-        int numberRoom = (int) session.getAttribute("numberRoom");
-        Room room = game.getMaze().getRoom(numberRoom);
 
-        if (room.getKey() != null) {
-            Key key = room.getKey();
-            game.getPlayer().addKey(key);
-            room.removeKey();
-        } else {
-            session.setAttribute("errorLog", "There is no key in this room, buckaroo.");
-        }
+        Game game = (Game) session.getAttribute("game");
+
+        String message = gameService.getKey(game);
+
+        gameService.getKey(game);
+
+        session.setAttribute("message", message);
 
         resp.sendRedirect("/nav");
     }

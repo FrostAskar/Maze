@@ -1,13 +1,12 @@
 package frost.countermobil.Maze.controllers;
 
-import frost.countermobil.Maze.models.Game;
-import frost.countermobil.Maze.models.Maze;
-import frost.countermobil.Maze.models.Player;
-import frost.countermobil.Maze.models.Room;
+import frost.countermobil.Maze.models.*;
 import frost.countermobil.Maze.services.DoorService;
 import frost.countermobil.Maze.services.GameService;
+import frost.countermobil.Maze.services.MessageService;
 import frost.countermobil.Maze.util.JSONParser;
 import frost.countermobil.Maze.util.Translator;
+import org.json.simple.JSONObject;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -23,26 +22,41 @@ public class NavController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         GameService gameService = new GameService();
-        DoorService doorService = new DoorService();
         Translator tr = new Translator();
         JSONParser jsonParser = new JSONParser();
 
         HttpSession session = req.getSession();
         Game game = (Game) session.getAttribute("game");
-        Player player = game.getPlayer();
+        Player player = gameService.recoverPlayer(game);
         Maze maze = gameService.recoverMaze(game);
-        int numberRoom = (int) session.getAttribute("numberRoom");
+        int numberRoom = gameService.getRoomOnPlayer(game);
         Room actualRoom = maze.getRoom(numberRoom);
-
-        String dir = req.getParameter("dir");
-        if (dir != null) {
-            numberRoom = doorService.moveToNextRoom(actualRoom, actualRoom.getDoorInSide(tr.singleLetterToWord(dir)));
-            actualRoom = maze.getRoom(numberRoom);
+        Maze.Directions dir = null;
+        String message = (String) session.getAttribute("message");
+        JSONObject jsonRoom =  jsonParser.roomToJSON(actualRoom, player);
+        //Check if nav is getting a direction from the maze
+        String parameterDir = req.getParameter("dir");
+        if (parameterDir != null) {
+            dir = tr.singleLetterToWord(parameterDir);
+            message = gameService.checkDirection(game, dir);
         }
 
-        req.setAttribute("jsonRoom", jsonParser.roomToJSON(actualRoom, player));
+        // If message is written, add it to JSON Object.
+        if (message != null) {
+            jsonRoom = gameService.addMesage(jsonRoom, message);
+            //After storing message it is removed from session as to not have it print in next load
+            session.removeAttribute("message");
+        //Values must be updated if checkDirection is performed successfully
+        } else {
+            numberRoom = gameService.getRoomOnPlayer(game);
+            actualRoom = maze.getRoom(numberRoom);
+            jsonRoom =  jsonParser.roomToJSON(actualRoom, player);
 
-        session.setAttribute("numberRoom", numberRoom);
+        }
+
+        session.setAttribute("jsonRoom", jsonRoom);
+
+        gameService.setRoomOnPlayer(game, numberRoom);
 
         RequestDispatcher dispatcher = req.getRequestDispatcher("/WEB-INF/jsp/maze.jsp");
         dispatcher.forward(req, resp);

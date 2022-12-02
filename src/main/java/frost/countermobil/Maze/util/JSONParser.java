@@ -68,4 +68,10 @@ public class JSONParser {
         return jsonObject;
     }
 
+    public JSONObject addMessageToJSON (JSONObject jsonRoom, String message){
+        JSONObject jsonObject = jsonRoom;
+        jsonObject.put("message", message);
+        return jsonObject;
+    }
+
 }

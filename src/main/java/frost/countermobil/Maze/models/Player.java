@@ -5,8 +5,7 @@ import java.util.List;
 
 public class Player {
 
-    int playerId;
-    int roomId;
+    int roomID;
     int money = 0;
     List<Key> keys = new ArrayList<>();
 
@@ -24,9 +23,18 @@ public class Player {
 
     public void addKey(Key key) {
         keys.add(key);
+        this.money -= key.getCost();
     }
 
     public List<Key> getKeys() {
         return keys;
+    }
+
+    public int getRoomID() {
+        return roomID;
+    }
+
+    public void setRoomID(int roomID) {
+        this.roomID = roomID;
     }
 }

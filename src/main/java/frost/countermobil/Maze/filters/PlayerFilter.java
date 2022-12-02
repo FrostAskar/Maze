@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
-@WebFilter (urlPatterns = {"/nav"})
+@WebFilter (urlPatterns = {"/nav", "/getcoin", "/getkey", "/open", "/reset", "/endform"})
 public class PlayerFilter extends HttpFilter {
     @Override
     protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
@@ -20,6 +20,7 @@ public class PlayerFilter extends HttpFilter {
         Game game = (Game) session.getAttribute("game");
         if (game == null){
             res.sendRedirect("/start");
+            return;
         }
         chain.doFilter(req, res);
     }

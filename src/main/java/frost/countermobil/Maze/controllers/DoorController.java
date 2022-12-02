@@ -1,11 +1,15 @@
 package frost.countermobil.Maze.controllers;
 
 import frost.countermobil.Maze.models.Game;
+import frost.countermobil.Maze.models.Maze;
 import frost.countermobil.Maze.models.Player;
 import frost.countermobil.Maze.models.Room;
 import frost.countermobil.Maze.services.DoorService;
 import frost.countermobil.Maze.services.GameService;
+import frost.countermobil.Maze.services.MessageService;
+import frost.countermobil.Maze.util.JSONParser;
 import frost.countermobil.Maze.util.Translator;
+import org.json.simple.JSONObject;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -20,19 +24,19 @@ public class DoorController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         GameService gameService = new GameService();
-        DoorService doorService = new DoorService();
         Translator tr = new Translator();
+
         HttpSession session = req.getSession();
-
         Game game = (Game) session.getAttribute("game");
-        int numberRoom = (int) session.getAttribute("numberRoom");
-        Player player = game.getPlayer();
-        String dir = req.getParameter("dir");
+        String parameterDir = req.getParameter("dir");
+        Maze.Directions dir = tr.singleLetterToWord(parameterDir);
 
-        Room room = game.getMaze().getRoom(numberRoom);
-        if (doorService.CheckKeysForDoor(room.getDoorInSide(tr.singleLetterToWord(dir)), player)) {
-            game.getMaze().getRoom(numberRoom).getDoorInSide(tr.singleLetterToWord(dir)).unlock();
+        String message = gameService.openDoor(game, dir);
+
+        if (message != null) {
+            session.setAttribute("message", message);
         }
+
         resp.sendRedirect("/nav");
     }
 }

@@ -29,9 +29,9 @@ public class StartController extends HttpServlet {
 
         int mazeVersion = Integer.parseInt(req.getParameter("mapid"));
         Game game = gameService.createGame(mazeVersion);
-
+        gameService.startTimer(game);
+        gameService.setRoomOnPlayer(game, 1);
         session.setAttribute("game", game);
-        session.setAttribute("numberRoom", 1);
 
         resp.sendRedirect("/nav");
     }
